@@ -26,7 +26,7 @@ jobs:
 
 # Manual deployment job for the test branch
   manual-deploy:
-    if: github.ref == 'refs/heads/test' && github.event_name == 'workflow_run'
+    if: github.ref == 'refs/heads/manual' && github.event_name == 'workflow_run'
     needs: deploy
     runs-on: ubuntu-latest
     steps:
