@@ -2,7 +2,7 @@ name: Media-Mob-Rebuild-Frontend-cicd
 
 on:
   push:
-    branches: [Dev, Staging, Main-Production]
+    branches: [Dev, Staging, master]
 
 
 jobs:
@@ -91,7 +91,7 @@ jobs:
         
 
   build-prod:
-    if: github.ref_name == 'Main-Production'
+    if: github.ref_name == 'master'
     runs-on: [self-hosted, Production]
     strategy:
       matrix:
