@@ -32,9 +32,6 @@ jobs:
     if: github.event_name == 'workflow_dispatch'
     needs: deploy
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        branch: [ ${{ github.event.inputs.branch }} ]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
