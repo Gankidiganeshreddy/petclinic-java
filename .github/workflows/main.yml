@@ -29,7 +29,7 @@ jobs:
       run: npm install 
 
   manual-deploy:
-    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/master'
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/manual'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
