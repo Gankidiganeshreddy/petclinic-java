@@ -1,0 +1,133 @@
+name: Media-Mob-Rebuild-Frontend-cicd
+
+on:
+  push:
+    branches: [Dev, Staging, Main-Production]
+
+
+jobs:
+  build-dev:
+    if: github.ref_name == 'Dev'
+    runs-on: [self-hosted, Dev]
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: Create .env file Frontend
+      run: |
+        echo "$FRONTEND_ENV" >> ${{ github.workspace }}/.env
+        echo "$service_account_file" >> ${{ github.workspace }}/service-account-file.json
+      shell: bash
+      env:
+        FRONTEND_ENV: ${{secrets.FILE_ENV_FRONTEND}}
+        service_account_file: ${{secrets.FILE_SERVICE_ACCOUNT_FILE_DEV}}
+    - run: npm install
+    - run: npm run build --if-present
+
+
+  deployment-Frontend-dev:
+   if: github.ref_name == 'Dev'
+   runs-on: [self-hosted, Dev]
+   needs: [build-dev]
+
+   steps:   
+    - name: deploy
+
+      run: |
+        cd /home/ubuntu/Development/Frontend-actions-runner/actions-runner/_work/Media-Mob-rebuild-Frontend/
+        cp -rf Media-Mob-rebuild-Frontend/ /home/ubuntu/Development/Frontend
+        rm -rf /home/ubuntu/Development/Frontend-actions-runner/actions-runner/_work/Media-Mob-rebuild-Frontend/
+        cd /home/ubuntu/Development/Frontend/Media-Mob-rebuild-Frontend
+        pm2 restart 1
+        
+  build-stage:
+    if: github.ref_name == 'Staging'
+    runs-on: [self-hosted, Stag]
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: Create .env file Frontend
+      run: |
+        echo "$FRONTEND_ENV" >> ${{ github.workspace }}/.env
+        echo "$service_account_file" >> ${{ github.workspace }}/service-account-file.json
+      shell: bash
+      env:
+        FRONTEND_ENV: ${{secrets.FILE_ENV_FRONTEND_STAGING}}
+        service_account_file: ${{secrets.FILE_SERVICE_ACCOUNT_FILE_STAGE}}
+    - run: npm install
+    - run: npm run build --if-present
+
+
+
+  deployment-Frontend-Stage:
+   if: github.ref_name == 'Staging'
+   runs-on: [self-hosted, Stag]
+   needs: [build-stage]
+
+   steps:   
+    - name: deploy
+
+      run: |
+        cd /home/ubuntu/Staging/Frontend-Staging-actions-runner/actions-runner/_work/Media-Mob-rebuild-Frontend
+        cp -rf Media-Mob-rebuild-Frontend /home/ubuntu/Staging/Frontend
+        rm -rf /home/ubuntu/Staging/Frontend-Staging-actions-runner/actions-runner/_work/Media-Mob-rebuild-Frontend
+        cd /home/ubuntu/Staging/Frontend/Media-Mob-rebuild-Frontend
+        pm2 restart 3
+        
+
+  build-prod:
+    if: github.ref_name == 'Main-Production'
+    runs-on: [self-hosted, Production]
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        
+    - name: Create .env file Frontend
+      run: |
+        echo "$FRONTEND_PROD_ENV" >> ${{ github.workspace }}/.env
+        echo "$service_account_file" >> ${{ github.workspace }}/service-account-file.json
+      shell: bash
+      env:
+        FRONTEND_PROD_ENV: ${{secrets.FILE_ENV_FRONTEND_PROD}}
+        service_account_file: ${{secrets.FILE_SERVICE_ACCOUNT_FILE_PROD}}
+    - run: npm install
+    - run: npm run build --if-present
+
+
+  deployment-FRONTEND-prod:
+   if: github.ref_name == 'Main-Production'
+   runs-on: [self-hosted, Production]
+   needs: [build-prod]
+
+   steps:   
+    - name: deploy-prod
+
+      run: |
+        cd /home/ubuntu/Frontend/actions-runner/_work/Media-Mob-rebuild-Frontend
+        cp -rf Media-Mob-rebuild-Frontend /home/ubuntu/Frontend/Production
+        rm -rf /home/ubuntu/Frontend/actions-runner/_work/Media-Mob-rebuild-Frontend
+        cd /home/ubuntu/Frontend/Production/Media-Mob-rebuild-Frontend
+        pm2 restart 1
