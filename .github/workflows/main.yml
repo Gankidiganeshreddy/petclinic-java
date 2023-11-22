@@ -1,8 +1,11 @@
 name: Media-Mob-Rebuild-Frontend-cicd
-
 on:
-  push:
-    branches: [Dev, Staging, master]
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: 'Test scenario tags'
+        required: false
+        type: boolean
 
 
 jobs:
