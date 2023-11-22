@@ -5,6 +5,12 @@ on:
     branches:
       - master
       - dev-new
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'The branch to deploy'
+        required: true
+        default: 'manual'
 
 jobs:
   deploy:
@@ -22,15 +28,23 @@ jobs:
     - name: Install Dependencies
       run: npm install 
 
-
-
-# Manual deployment job for the test branch
   manual-deploy:
-    if: github.ref == 'refs/heads/manual' && github.event_name == 'workflow_run'
+    if: github.event_name == 'workflow_dispatch'
     needs: deploy
     runs-on: ubuntu-latest
     steps:
-    - name: Manual Approval
-      uses: stefanzweifel/git-auto-commit-action@v4
-      with:
-        commit_message: 'Manual deployment approval'
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+  
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14
+  
+      - name: Install Dependencies
+        run: npm install 
+
+
+
+
+
